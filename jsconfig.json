@@ -1,0 +1,25 @@
+{
+	"compilerOptions": {
+		"target": "esnext",
+		"module": "exnext",
+		"allowJs": true,
+		"checkJs": true,
+    "lib": ["ex2021", "dom"],
+		"maxNodeModuleJsDepth": 1,
+		"esModuleInterop": true,
+		"forceConsistentCasingInFileNames": true,
+		"strict": false,
+		"skipLibCheck": true,
+    "exclude": ["node_modules"],
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./front/srcs/*"]
+    },
+    "rules": {
+      "@typescript-eslint/ban-ts-comment": [
+        "error",
+        {"ban-ts-ignore": true }
+      ]
+    }
+  }
+}
