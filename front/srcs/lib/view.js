@@ -73,7 +73,6 @@ export default class View extends HTMLElement {
     if (!this.constructor.template) {
       await this.constructor.getTemplate();
     }
-
     /** @type {HTMLElement} node */
     this.innerHTML = this.constructor.template;
     (await this.renderComponents())

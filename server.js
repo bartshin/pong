@@ -13,6 +13,9 @@ app.use((req, res, next) => {
 app.use("/srcs", express.static(path.resolve(__dirname, "front", "srcs"), 
   { extensions: ["js"] }
 ));
+app.use("/three", express.static(path.resolve(__dirname, "node_modules", "three"), 
+  { extensions: ["js"] }
+));
 
 app.get("/*", (req, res) => {
   res.sendFile(path.resolve("front/srcs", "index.html"));
