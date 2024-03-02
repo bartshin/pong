@@ -2,7 +2,7 @@ import { distSquared2D, isEqualF, isEqual2D } from "@/game/physicsUtils";
 
 export class PhysicsType {
 
-  static get TYPES() {
+  static get COLLIDE_TYPES() {
     return ({
       STATIC: "STATIC",
       DYNAMIC: "DYNAMIC"
@@ -16,10 +16,10 @@ export class PhysicsType {
     });
   }
 
-  static get COLLIDE_TYPES() {
+  static get TYPES() {
     return ({
-      ELASTIC: "ELASTIC",
-      INELASTIC: "INELASTIC"
+      MOVABLE: "MOVABLE",
+      IMMOVABLE: "IMMOVABLE"
     });
   }
 }
@@ -46,9 +46,9 @@ export default class PhysicsEntity {
 
   /** @params {Object} params
    *  @param {{
-   *    type: "STATIC" | "DYNAMIC",
+   *    collideType: "STATIC" | "DYNAMIC",
    *    shape: "RECTANGLE" | "CIRCLE",
-   *    collideType: "ELASTIC" | "INELASTIC",
+   *    type: "MOVABLE" | "IMMOVABLE",
    *    width: Number,
    *    height: Number,
    *    centerX: Number,
@@ -74,8 +74,8 @@ export default class PhysicsEntity {
 
   /** @params {Object} params
    *  @param {{
-   *    type: "STATIC" | "DYNAMIC",
-   *    collideType?: "ELASTIC" | "INELASTIC",
+   *    type: "MOVABLE" | "IMMOVABLE",
+   *    collideType?: "STATIC" | "DYNAMIC",
    *    width: Number,
    *    height: Number,
    *    center: {
@@ -84,7 +84,7 @@ export default class PhysicsEntity {
    *    }
    *  }} params
    */
-  static createRect({type, collideType = "ELASTIC", width, height, center}){
+  static createRect({type, collideType = "STATIC", width, height, center}){
     return new PhysicsEntity({
       type,
       shape: "RECTANGLE",
@@ -97,8 +97,8 @@ export default class PhysicsEntity {
   }
   /** @params {Object} params
    *  @param {{
-   *    type: "STATIC" | "DYNAMIC",
-   *    collideType?: "ELASTIC" | "INELASTIC",
+   *    type: "MOVABLE" | "IMMOVABLE",
+   *    collideType?: "STATIC" | "DYNAMIC",
    *    radius: Number,
    *    center: {
    *      x: Number,
@@ -106,7 +106,7 @@ export default class PhysicsEntity {
    *    }
    *  }} params
    */
-  static createCircle({type, collideType = "ELASTIC", radius, center}){
+  static createCircle({type, collideType = "STATIC", radius, center}){
     return new PhysicsEntity({
       type,
       shape: "CIRCLE",
@@ -176,15 +176,14 @@ export default class PhysicsEntity {
     return this.#shape == PhysicsType.SHAPES[shapeName];
   }
 
-  /** @param {"ELASTIC" | "INELASTIC"} typeName
-   *  @returns Boolean
+  /** @returns Boolean
    * */
-  isCollideType(typeName) {
-    return this.#collideType == PhysicsType.COLLIDE_TYPES[typeName];
+  get isMovable() {
+    return this.#type == PhysicsType.TYPES.MOVABLE;
   }
 
   get isDynamic() {
-    return this.#type == PhysicsType.TYPES.DYNAMIC;
+    return this.#collideType == PhysicsType.COLLIDE_TYPES.DYNAMIC;
   }
 
   get isMoving() {

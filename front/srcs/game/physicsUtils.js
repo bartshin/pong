@@ -1,4 +1,4 @@
-const EPSILON = 0.0001;
+export const EPSILON = 0.0001;
 
 /** @param {Number} a
  *  @param {Number} b

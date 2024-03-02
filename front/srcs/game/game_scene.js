@@ -2,10 +2,49 @@ import * as THREE from "three";
 import Physics from "@/game/physics";
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import PhysicsEntity from "@/game/physicsEntity";
+import { EPSILON } from "@/game/physicsUtils";
+
+const FRAME_TIME_TRESHOLD = 0.01;
+const MAX_PEDDLE_SPEED = 30;
+const PEDDLE_ACCEL = 5;
+const PEDDLE_DECEL_RATIO = 0.5;
+
+/** @type {{
+ *    [key: string] : {
+ *      player: Number,
+ *      x: Number,
+ *      y: Number,
+ *    }
+ *  }}
+ */
+const controlMap = {
+   "ArrowLeft": {
+    player: 0,
+    x: -1,
+    y: 0,
+  },
+  "ArrowRight": {
+    player: 0, 
+    x: 1,
+    y: 0,
+  },
+  "a": {
+    player: 1, 
+    x: -1,
+    y: 0,
+  },
+  "d": {
+    player: 1, 
+    x: 1,
+    y: 0,
+  },
+};
+
 /**
  * Game Scene.
  */
 export default class Scene {
+
 
   #physics;
   #scene;
@@ -30,6 +69,41 @@ export default class Scene {
    */
   #objects = [];
   
+  /** @type {{
+   *    mesh: THREE.Mesh,
+   *    physicsId: Number
+   *  }[]}
+   */
+  #peddles = [];
+
+  /** @type {{
+   *    pressed: {
+   *      player: Number,
+   *      x: Number,
+   *      y: Number,
+   *      key: string | null,
+   *    }
+   *   }[]}
+   */
+  #peddleControls = [
+    {
+      pressed: {
+        player: 0,
+        x: 0,
+        y: 0,
+        key: null
+      }
+    }, 
+    {
+      pressed: {
+        player: 1,
+        x: 0,
+        y: 0,
+        key: null
+      }
+    }
+  ];
+
   #isPlaying = true;
   #renderId = 0;
 
@@ -51,6 +125,7 @@ export default class Scene {
       .#init()
       .#addObjects()
       .#addHelpers()
+      .#addControls()
       .#startRender();
   }
 
@@ -74,6 +149,13 @@ export default class Scene {
   }
 
   #addObjects() {
+    this.#addBall()
+      .#addWalls()
+      .#addPeddles()
+    return this;
+  }
+
+  #addBall() {
     const ball = new THREE.Mesh(
       new THREE.SphereGeometry(1, 16, 16),
       new THREE.MeshStandardMaterial({
@@ -84,13 +166,14 @@ export default class Scene {
     );
     ball.position.set(0, 0, 0);
     const ballPysics = PhysicsEntity.createCircle({
-      type: "DYNAMIC",
+      type: "MOVABLE",
+      collideType: "DYNAMIC",
       radius: 1,
       center: { x: 0, y:0 }
     });
     ballPysics.veolocity = {
-      x: 2,
-      y: -3
+      x: 10,
+      y: 15
     };
     const ballId = this.#physics.addObject(ballPysics)[0];
 
@@ -100,40 +183,37 @@ export default class Scene {
         physicsId: ballId
       },
     );
-
-    this.#addWalls({
-      width: 1,
-      height: 20,
-    }, [
-      {
-        x: -10, 
-        y: 0,
-      },
-      {
-        x: 10, 
-        y: 0 
-      }
-    ]
-    );
-    this.#addWalls({
-      width: 20,
-      height:1
-    },[
-      {
-        x: 0,
-        y: 10,
-      },
-      {
-        x: 0,
-        y: -10
-      }
-    ])
-
-    this.#scene.add(...this.#objects.map(obj => obj.mesh));
+    this.#scene.add(ball);
     return this;
   }
 
-  #addWalls(wallSize, wallPositions) {
+  #addWalls() {
+    this.#addWall({ width: 1, height: 40, }, 
+      [
+        { x: -10, y: 0 },
+        { x: 10, y: 0 }
+      ]
+    );
+    this.#addWall({ width: 20, height:1 },
+      [
+        { x: 0, y: 20 },
+        { x: 0, y: -20 }
+      ]
+    );
+
+    return this;
+  }
+
+  /** @param {{
+    *   width: Number,
+    *   height: Number
+    * }} wallSize
+    * @param {{
+    *   x: Number,
+    *   y: Number
+    * }[]} wallPositions
+    */
+  #addWall(wallSize, wallPositions) {
 
     const wallGeometry = new THREE.BoxGeometry(wallSize.width, wallSize.height);
     const wallMaterial = new THREE.MeshStandardMaterial({
@@ -142,42 +222,102 @@ export default class Scene {
       roughness: 0.4
     });
 
-    const walls = wallPositions.map(pos => new THREE.Mesh(
-      wallGeometry, 
-      wallMaterial
-    ));
-    walls.forEach((wall, index) => {
-      const pos = wallPositions[index];
-      wall.position.set(pos.x, pos.y, 0);
-      const wallPhysics =  PhysicsEntity.createRect({
-      type: "STATIC",
-      width: wallSize.width,
-      height: wallSize.height,
-      center: {
-        x: pos.x, 
-        y: pos.y
-      }
-    })
-      const physicsId = this.#physics.addObject(wallPhysics)[0];
+    const wallMeshes = wallPositions.map(pos =>  {
+      const mesh = new THREE.Mesh(
+        wallGeometry, 
+        wallMaterial
+      );
+      mesh.position.set(pos.x, pos.y, 0);
+      return mesh;
+    }
+    );
+    const wallPhysics = wallPositions.map(pos => {
+        return PhysicsEntity.createRect({
+          type: "IMMOVABLE",
+          width: wallSize.width,
+          height: wallSize.height,
+          center: {
+            x: pos.x, 
+            y: pos.y
+          }
+        });
+      });
+    const wallPhysicsId = this.#physics.addObject(...wallPhysics);
+    for (let i = 0; i < wallPhysicsId.length; ++i) {
+      const physicsId = wallPhysicsId[i];
       this.#objects.push(
         {
-          mesh: wall,
+          mesh: wallMeshes[i],
           physicsId: physicsId
         },
       );
-    })
-
+    }
+    this.#scene.add(...wallMeshes);
   }
 
-  #addHelpers() {
-    const axesHelper = new THREE.AxesHelper(5);
-    axesHelper.setColors(
-      new THREE.Color(0xffffff), 
-      new THREE.Color(0xffffff), 
-      new THREE.Color(0xffffff)
-    )
-    this.#scene.add(axesHelper);
-    return this;
+  #addPeddles() {
+    const size = {
+      width: 3,
+      height: 1
+    };
+    
+    const geometry = new THREE.BoxGeometry(
+      size.width,
+      size.height
+    );
+    const colors = [
+      0x0000ff,
+      0x00ffff
+    ];
+    const materials = colors.map(color =>
+      new THREE.MeshStandardMaterial({
+        color: color,
+        metalness: 0.3,
+        roughness: 0.5,
+      })
+    );
+    const positions = [
+      {
+        x: 0,
+        y: -10
+      },
+      {
+        x: 0,
+        y: 10
+      }
+    ];
+    const meshes = materials.map((material, index) => {
+      const mesh = new THREE.Mesh(
+        geometry,
+        material
+      );
+      const pos = positions[index];
+      mesh.position.set(pos.x, pos.y, 0);
+      return mesh;
+    });
+    const physicsEntities = positions.map(pos => 
+      PhysicsEntity.createRect({
+        type: "MOVABLE",
+        width: size.width,
+        height: size.height,
+        center: {
+          x: pos.x,
+          y: pos.y
+        }
+      })
+    );
+    const physicsIds = this.#physics.addObject(...physicsEntities);
+    for (let i = 0; i < physicsIds.length; ++i) {
+      this.#objects.push({
+        mesh: meshes[i],
+        physicsId: physicsIds[i]
+      });
+      this.#peddles.push({
+        mesh: meshes[i],
+        physicsId: physicsIds[i]
+      })
+    };
+    this.#scene.add(...meshes);
   }
 
   #setLights() {
@@ -265,14 +405,75 @@ export default class Scene {
     return this;
   }
 
+  #addHelpers() {
+    const axesHelper = new THREE.AxesHelper(5);
+    axesHelper.setColors(
+      new THREE.Color(0xffffff), 
+      new THREE.Color(0xffffff), 
+      new THREE.Color(0xffffff)
+    )
+    this.#scene.add(axesHelper);
+    return this;
+  }
+
+  #addControls() {
+    window.addEventListener("keydown", event => {
+      const controlKey = controlMap[event.key];
+      if (!controlKey)
+        return ;
+      this.#peddleControls[controlKey.player].pressed = {
+        ...controlKey,
+        key: event.key
+      };
+    });
+
+    window.addEventListener("keyup", event => {
+      const controlKey = controlMap[event.key];
+      if (!controlKey)
+        return ;
+      if (this.#peddleControls[controlKey.player].pressed.key == 
+      event.key) {
+        this.#peddleControls[controlKey.player].pressed = {
+          x: 0, 
+          y: 0,
+          key: null,
+          player: controlKey.player
+        };
+      };
+    })
+    return this;
+  }
+
   #startRender() {
     const tick = (() => {
       const elapsed = this.#time.clock.getElapsedTime();
-      const frameTime = elapsed - this.#time.elapsed;
+      let frameTime = elapsed - this.#time.elapsed;
       this.#time.elapsed = elapsed;
-      if (frameTime > 0.1)
-        console.log(frameTime);
-      this.#physics.update(frameTime);
+      let frameSlice = Math.min(frameTime, FRAME_TIME_TRESHOLD);
+      this.#peddles.forEach((peddle, index) => {
+        const control = this.#peddleControls[index];
+        this.#physics.setState(peddle.physicsId,
+          (state) => {
+            let vel = { ...state.velocity };
+            if (control.pressed.x == 0) {
+              vel.x = Math.abs(vel.x) < EPSILON ? 0: vel.x * PEDDLE_DECEL_RATIO;
+            }
+            else if (control.pressed.x > 0) {
+              vel.x = Math.min(MAX_PEDDLE_SPEED, vel.x + PEDDLE_ACCEL);
+            }
+            else {
+              vel.x = Math.max(-MAX_PEDDLE_SPEED, vel.x - PEDDLE_ACCEL);
+            }
+            return { velocity: {
+              ...vel
+            }};
+        })
+      })
+      while (frameTime > EPSILON) {
+        this.#physics.update(frameSlice);
+        frameTime -= frameSlice; 
+        frameSlice = Math.min(frameTime, FRAME_TIME_TRESHOLD);
+      }
       const states = this.#physics.allStates;
       this.#objects.forEach(({mesh, physicsId}) => {
         if (!states[physicsId])
