@@ -13,10 +13,11 @@ export default class GameView extends View {
 
   connectedCallback() {
     super.connectedCallback();
+
     this.#canvas = this.querySelector(".game_canvas")
     const container = this.#canvas.parentElement;
     this.#canvas.width = container.offsetWidth
     this.#canvas.height = container.offsetHeight;
-    this.#scene = new Scene({canvas: this.#canvas});
+    //this.#scene = new Scene({canvas: this.#canvas});
   }
 }

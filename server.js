@@ -13,6 +13,9 @@ app.use((req, res, next) => {
 app.use("/srcs", express.static(path.resolve(__dirname, "front", "srcs"), 
   { extensions: ["js"] }
 ));
+
+app.use("/resources", express.static(path.resolve(__dirname, "front", "resources")));
+
 app.use("/three", express.static(path.resolve(__dirname, "node_modules", "three"), 
   { extensions: ["js"] }
 ));
