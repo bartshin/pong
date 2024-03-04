@@ -3,6 +3,7 @@ import Physics from "@/game/physics";
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import PhysicsEntity from "@/game/physicsEntity";
 import { EPSILON } from "@/game/physicsUtils";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 
 const FRAME_TIME_TRESHOLD = 0.01;
 const MAX_PEDDLE_SPEED = 30;
@@ -48,6 +49,7 @@ export default class Scene {
 
   #physics;
   #scene;
+  #gameScene;
   #canvas;
   #windowSize;
   /** @type {THREE.PerspectiveCamera} */
@@ -116,6 +118,7 @@ export default class Scene {
   constructor({canvas}) {
     this.#canvas = canvas;
     this.#scene = new THREE.Scene();
+    this.#gameScene = new THREE.Scene();
     this.#windowSize = {
       width: canvas.width,
       height: canvas.height
@@ -134,6 +137,44 @@ export default class Scene {
   }
 
   #load() {
+
+    const gltfLoader = new GLTFLoader();
+    gltfLoader.load(
+      "resources/macintosh/scene.gltf",
+      (gltf) => {
+        const model = gltf.scene;
+        model.scale.set(25, 25, 25);
+        const root = model.children[0].children[0].children[0];
+        const screen = root.children[2];
+        const screenBox= new THREE.Box3().setFromObject(screen);
+        const screenSize = {
+          x: screenBox.max.x - screenBox.min.x,
+          y: screenBox.max.y - screenBox.min.y,
+          z: screenBox.max.z - screenBox.min.z
+        };
+        const sceneBox = new THREE.Box3().setFromObject(this.#gameScene);
+        const sceneSize = {
+          x: sceneBox.max.x - sceneBox.min.x,
+          y: sceneBox.max.y - sceneBox.min.y,
+          z: sceneBox.max.z - sceneBox.min.z
+        };
+        root.add(this.#gameScene);
+        this.#gameScene.position.copy(screen.position)
+        this.#gameScene.position.z += 0.08;
+        
+        this.#gameScene.scale.set(
+         screenSize.x / sceneSize.x - 0.02,
+         screenSize.y / sceneSize.y - 0.015,
+         screenSize.z / sceneSize.z  
+        );
+        this.#scene.add(model);
+      },
+      (_) => {
+      },
+      (error) => {
+        console.log("loade error", error);
+      }
+    )
 
     return this;
   }
@@ -183,7 +224,7 @@ export default class Scene {
         physicsId: ballId
       },
     );
-    this.#scene.add(ball);
+    this.#gameScene.add(ball);
     return this;
   }
 
@@ -252,7 +293,7 @@ export default class Scene {
         },
       );
     }
-    this.#scene.add(...wallMeshes);
+    this.#gameScene.add(...wallMeshes);
   }
 
   #addPeddles() {
@@ -317,20 +358,31 @@ export default class Scene {
         physicsId: physicsIds[i]
       })
     };
-    this.#scene.add(...meshes);
+    this.#gameScene.add(...meshes);
   }
 
   #setLights() {
     const ambientLight = new THREE.AmbientLight(0xffffff, 2.1);
     const directionalLight = new THREE.DirectionalLight(
       0xffffff,
-      2
+      1
     );
     directionalLight.castShadow = true;
     directionalLight.shadow.mapSize.set(1024, 1024);
     directionalLight.shadow.camera.far = 15;
-    directionalLight.position.set(2, 2, 5);
+    directionalLight.position.set(5, 5, 2);
     this.#scene.add(ambientLight, directionalLight);
+
+    const gameAmbientLight = new THREE.AmbientLight(0xffffff, 2.1);
+    const gameDirectionalLight = new THREE.DirectionalLight(
+      0xffffff,
+      1
+    );
+    gameDirectionalLight.castShadow = true;
+    gameDirectionalLight.shadow.mapSize.set(1024, 1024);
+    gameDirectionalLight.shadow.camera.far = 15;
+    gameDirectionalLight.position.set(0, 0, 1);
+    this.#gameScene.add(gameAmbientLight, gameDirectionalLight);
     return this;
   }
 
@@ -349,7 +401,7 @@ export default class Scene {
 
   #setRenderer() {
     this.#renderer = new THREE.WebGLRenderer({
-      canvas: this.#canvas
+      canvas: this.#canvas,
     });
     this.#renderer.shadowMap.enabled = true;
     this.#renderer.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -413,6 +465,13 @@ export default class Scene {
       new THREE.Color(0xffffff)
     )
     this.#scene.add(axesHelper);
+    const gameAxesHelper = new THREE.AxesHelper(5);
+    gameAxesHelper.setColors(
+      new THREE.Color(0x0000ff), 
+      new THREE.Color(0x0000ff), 
+      new THREE.Color(0x0000ff)
+    );
+    this.#gameScene.add(gameAxesHelper);
     return this;
   }
 
@@ -482,6 +541,9 @@ export default class Scene {
         mesh.position.set(position.x, position.y, mesh.position.z);
       })
       this.#renderer.render(this.#scene, this.#camera);
+      this.#renderer.autoClear = false;
+      this.#renderer.render(this.#gameScene, this.#camera);
+      this.#renderer.autoClear = true;
       this.controls.update();
       this.#renderId = window.requestAnimationFrame(tick);
     }).bind(this);
