@@ -9,6 +9,7 @@ const FRAME_TIME_TRESHOLD = 0.01;
 const MAX_PEDDLE_SPEED = 30;
 const PEDDLE_ACCEL = 5;
 const PEDDLE_DECEL_RATIO = 0.5;
+const SOUND_EFFECT_THRESHOLD = 0.1;
 
 /** @type {{
  *    [key: string] : {
@@ -78,6 +79,14 @@ export default class Scene {
    */
   #peddles = [];
 
+	/** @type {Number[]} */
+	#eventsIds = [];
+
+	#hitSound = {
+		sound: new Audio("resources/sound/hit.mp3"),
+		lastPlayed: 0
+	};
+
   /** @type {{
    *    pressed: {
    *      player: Number,
@@ -129,6 +138,7 @@ export default class Scene {
       .#addObjects()
       .#addHelpers()
       .#addControls()
+			.#addEvents()
       .#startRender();
   }
 
@@ -402,6 +412,7 @@ export default class Scene {
   #setRenderer() {
     this.#renderer = new THREE.WebGLRenderer({
       canvas: this.#canvas,
+      alpha: true,
     });
     this.#renderer.shadowMap.enabled = true;
     this.#renderer.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -502,6 +513,26 @@ export default class Scene {
     })
     return this;
   }
+
+	#addEvents() {
+		const id = this.#physics.addCollisionCallback(
+			(collider, collidee, time) => {
+				if (Math.abs(this.#time.elapsed - this.#hitSound.time) < SOUND_EFFECT_THRESHOLD)
+					return false;
+				if (collider.isShape("CIRCLE") || collidee.isShape("CIRCLE")) {
+					return true;
+				}
+				return false;
+			},
+			(collider, collidee, time) => {
+				this.#hitSound.sound.currentTime = 0;
+				this.#hitSound.sound.play();
+				this.#hitSound.time = this.#time.elapsed;
+			}
+		);
+		this.#eventsIds.push(id);
+		return this;
+	}
 
   #startRender() {
     const tick = (() => {
