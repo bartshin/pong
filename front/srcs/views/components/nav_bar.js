@@ -2,7 +2,10 @@ import View from "@/lib/view";
 
 export default class NavBar extends View {
 
-  constructor() {
+  constructor(params) {
     super();
+    if (params && params.data) {
+      this.data = params.data;
+    }
   }
 }

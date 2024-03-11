@@ -3,37 +3,37 @@ import { isEqualF } from "@/game/physicsUtils";
 
 export default class Physics {
 
-  /** @type {Number} */
+  /** @type {number} */
   #objId = 0;
-  
+
   /** @type {{
-   *  [key: Number]: PhysicsEntity
+   *  [key: number]: PhysicsEntity
    * }} */
   #allObjects = {};
 
-  /** @type {Number[]} */
+  /** @type {number[]} */
   #movableObjects = [];
 
-  /** @type {Number[]} */
+  /** @type {number[]} */
   #collidibleObjectIds = [];
 
-	/** @type {{
-	 * [key: Number]: {
-	 * 		callback: (collider: PhysicsEntity, collidee: PhysicsEntity) => void,
-	 *		trigger: (collider: PhysicsEntity, collidee: PhysicsEntity) => boolean,
-	 *	}
-	 * }} 
-	 */
-	#collideCallbacks = [];
-	#collideCallbackId = 0;
+  /** @type {{
+   * [key: number]: {
+   * 		callback: (collider: PhysicsEntity, collidee: PhysicsEntity) => void,
+   *		trigger: (collider: PhysicsEntity, collidee: PhysicsEntity) => boolean,
+   *	}
+   * }} 
+   */
+  #collideCallbacks = [];
+  #collideCallbackId = 0;
 
   constructor() {
 
   }
 
   /** @param {PhysicsEntity[]} objs 
-   *  @returns {Number[]}
-    * */
+   *  @returns {number[]}
+   * */
   addObject(...objs) {
     const ids = [];
     objs.forEach(obj => {
@@ -48,16 +48,30 @@ export default class Physics {
     return ids;
   }
 
-  /** @param {Number} objId
+  /** @param {number} id */
+  removeObject(id) {
+    const target = this.#allObjects[id];
+    if (target.isMovable) {
+      const index = this.#movableObjects.findIndex(i => id == i);
+      if (index != -1)
+        this.#movableObjects.splice(index, 1);
+    }
+    const index = this.#collidibleObjectIds.findIndex(i => id == i);
+    if (index != -1)
+      this.#collidibleObjectIds.splice(index, 1);
+    delete this.#allObjects[id];
+  }
+
+  /** @param {number} objId
    *  @param {function({
-   *    accel: { x: Number, y: Number },
-   *    velocity: { x: Number, y: Number },
-   *    position: { x: Number, y: Number }
+   *    accel: { x: number, y: number },
+   *    velocity: { x: number, y: number },
+   *    position: { x: number, y: number }
    *  }):
    *  {
-   *    accel?: { x: Number, y: Number },
-   *    velocity?: { x: Number, y: Number },
-   *    position?: { x: Number, y: Number }
+   *    accel?: { x: number, y: number },
+   *    velocity?: { x: number, y: number },
+   *    position?: { x: number, y: number }
    *  }} setCallback
    */
   setState(objId, setCallback) {
@@ -80,7 +94,7 @@ export default class Physics {
       obj.position = res.position;
   }
 
-  /**  @param {Number} elapsedTime */
+  /**  @param {number} elapsedTime */
   update(elapsedTime) {
     this.#updateVelocities(elapsedTime)
       .#updatePositions(elapsedTime)
@@ -88,11 +102,11 @@ export default class Physics {
   }
 
   get allStates() {
-  /** @type {{
-   *   [key: Number]: {
-   *    position: { x: Number, y: Number },
-   *    velocity: { x: Number, y: Number }
-   *   }}} */
+    /** @type {{
+     *   [key: number]: {
+     *    position: { x: number, y: number },
+     *    velocity: { x: number, y: number }
+     *   }}} */
     const states = {};
     Object.entries(this.#allObjects)
       .forEach(([id, obj]) => {
@@ -107,7 +121,7 @@ export default class Physics {
     return states;
   }
 
-  /**  @param {Number} objId */
+  /**  @param {number} objId */
   getState(objId) {
     const obj = this.#allObjects[objId];
     if (!obj) 
@@ -118,24 +132,25 @@ export default class Physics {
     });
   }
 
-	/** @param {(collider: PhysicsEntity, collidee: PhysicsEntity) => void} callback
-	 *	@param {(collider: PhysicsEntity, collidee: PhysicsEntity) => boolean} trigger
-	 * 	@returns {Number} id
-	*/
-	addCollisionCallback(trigger, callback) {
-		const id = this.#collideCallbackId++;
-		this.#collideCallbacks[id] = {
-			trigger,
-			callback
-		};
-		return id;
-	}
-	/** @param {Number}id */
-	removeCollisionCallback(id) {
-		this.#collideCallbackId[id]
-	}
+  /** 
+   *	@param {(collider: PhysicsEntity, collidee: PhysicsEntity) => boolean} trigger
+   * @param {(collider: PhysicsEntity, collidee: PhysicsEntity) => void} callback
+   * 	@returns {number} id
+   */
+  addCollisionCallback(trigger, callback) {
+    const id = this.#collideCallbackId++;
+    this.#collideCallbacks[id] = {
+      trigger,
+      callback
+      };
+    return id;
+    }
+    /** @param {number}id */
+  removeCollisionCallback(id) {
+    this.#collideCallbackId[id]
+  }
 
-  /**  @param {Number} elapsedTime */
+  /**  @param {number} elapsedTime */
   #updateVelocities(elapsedTime) {
     for (let id of this.#movableObjects) {
       const obj = this.#allObjects[id];
@@ -158,7 +173,7 @@ export default class Physics {
     return this;
   }
 
-  /**  @param {Number} elapsedTime */
+  /**  @param {number} elapsedTime */
   #updatePositions(elapsedTime) {
     for (let id of this.#movableObjects) {
       const obj = this.#allObjects[id];
@@ -178,7 +193,7 @@ export default class Physics {
   }
 
   #handleCollisions() {
-		const handlers = Object.values(this.#collideCallbacks);
+    const handlers = Object.values(this.#collideCallbacks);
     this.#getAllCollisions()
       .forEach(({collider, collidee}) => {
         if (!collidee.isDynamic || !collider.isDynamic) {
@@ -187,157 +202,157 @@ export default class Physics {
         else {
           this.#resolveCollideWithDynamic(collider, collidee);
         }
-				handlers.forEach(({trigger, callback}) => {
-					if (trigger(collider, collidee)) {
-						callback(collider, collidee);
-					}
-				})
+        handlers.forEach(({trigger, callback}) => {
+          if (trigger(collider, collidee)) {
+            callback(collider, collidee);
+            }
+          })
       })
     return this;
   }
 
-  /** @param {PhysicsEntity} collider
-   *  @param {PhysicsEntity} collidee
-   */
-  #resolveCollideWithStatic(collider, collidee) {
-    if (collidee.isDynamic) {
-      const temp = collider;
-      collidee = collider;
-      collider = temp;
-    }
-
-    const distSquared = {
-      x: Math.pow(collider.midX - collidee.midX, 2), 
-      y: Math.pow(collider.midY - collidee.midY, 2)
-    };
-
-    const halfSize = {
-      width: (collider.width + collidee.width) * 0.5,
-      height: (collider.height + collidee.height) * 0.5
-    }
-
-    const collideAxes = {
-      x: distSquared.x < Math.pow(halfSize.width, 2),
-      y: distSquared.y < Math.pow(halfSize.height, 2)
-    };
-
-    if (!collideAxes.x || !collideAxes.y) {
-      return ;
-    }
-
-    const collisionEpsilon = (Math.abs(collider.veolocity.x) + Math.abs(collider.veolocity.y)) * 0.05;
-    if (collideAxes.x) {
-      if (collider.veolocity.x > 0 && 
-        collider.midX < collidee.midX &&
-        Math.abs(collider.right - collidee.left) < collisionEpsilon) {
-        collider.position.x = collidee.left - collider.width; 
+    /** @param {PhysicsEntity} collider
+     *  @param {PhysicsEntity} collidee
+     */
+    #resolveCollideWithStatic(collider, collidee) {
+      if (collidee.isDynamic) {
+        const temp = collider;
+        collidee = collider;
+        collider = temp;
       }
-      else if (collider.veolocity.x < 0 && 
-        collider.midX > collidee.midX &&
-        Math.abs(collider.left - collidee.right) < collisionEpsilon) {
-        collider.position.x = collidee.right;
+
+      const distSquared = {
+        x: Math.pow(collider.midX - collidee.midX, 2), 
+        y: Math.pow(collider.midY - collidee.midY, 2)
+      };
+
+      const halfSize = {
+        width: (collider.width + collidee.width) * 0.5,
+        height: (collider.height + collidee.height) * 0.5
+      }
+
+      const collideAxes = {
+        x: distSquared.x < Math.pow(halfSize.width, 2),
+        y: distSquared.y < Math.pow(halfSize.height, 2)
+      };
+
+      if (!collideAxes.x || !collideAxes.y) {
+        return ;
+      }
+
+      const collisionEpsilon = (Math.abs(collider.veolocity.x) + Math.abs(collider.veolocity.y)) * 0.05;
+      if (collideAxes.x) {
+        if (collider.veolocity.x > 0 && 
+          collider.midX < collidee.midX &&
+          Math.abs(collider.right - collidee.left) < collisionEpsilon) {
+          collider.position.x = collidee.left - collider.width; 
+        }
+        else if (collider.veolocity.x < 0 && 
+          collider.midX > collidee.midX &&
+          Math.abs(collider.left - collidee.right) < collisionEpsilon) {
+          collider.position.x = collidee.right;
+        }
+        else {
+          collideAxes.x = false;
+        }
+      }
+      if (collideAxes.y) {
+        if (collider.veolocity.y > 0 && 
+          collider.midY < collidee.midY &&
+          Math.abs(collider.top - collidee.bottom) < collisionEpsilon) {
+          collider.position.y = collidee.bottom - collider.height;
+        }
+        else if (collider.veolocity.y < 0 &&
+          collider.midY > collidee.midY &&
+          Math.abs(collider.bottom - collidee.top) < collisionEpsilon) {
+          collider.position.y = collidee.top;
+        }
+        else {
+          collideAxes.y = false;
+        }
+      }
+
+      if (collider.isDynamic)  {
+        // TODO: acceleration?
+        if (collideAxes.x) { 
+          collider.veolocity.x *= -1;
+        }
+        if (collideAxes.y)
+          collider.veolocity.y *= -1;
       }
       else {
-        collideAxes.x = false;
-      }
-    }
-    if (collideAxes.y) {
-      if (collider.veolocity.y > 0 && 
-        collider.midY < collidee.midY &&
-        Math.abs(collider.top - collidee.bottom) < collisionEpsilon) {
-        collider.position.y = collidee.bottom - collider.height;
-      }
-      else if (collider.veolocity.y < 0 &&
-        collider.midY > collidee.midY &&
-        Math.abs(collider.bottom - collidee.top) < collisionEpsilon) {
-        collider.position.y = collidee.top;
-      }
-      else {
-        collideAxes.y = false;
+        collider.acceleration = { x: 0, y: 0 };
+        collider.veolocity = { x: 0, y:0 };
       }
     }
 
-    if (collider.isDynamic)  {
-      // TODO: acceleration?
-      if (collideAxes.x) { 
-        collider.veolocity.x *= -1;
-      }
-      if (collideAxes.y)
-        collider.veolocity.y *= -1;
+    /** @param {PhysicsEntity} collider
+     *  @param {PhysicsEntity} collidee
+     */
+    #resolveCollideWithDynamic(collider, collidee) {
+      throw "dynamic + dynamic collision not implemented";
     }
-    else {
-      collider.acceleration = { x: 0, y: 0 };
-      collider.veolocity = { x: 0, y:0 };
+
+    #getAllCollisions() {
+      const movingObjects = {};
+      const collisions = [];
+      for (let id in this.#allObjects) {
+        const obj = this.#allObjects[id];
+        if (obj && obj.isMoving) {
+          collisions.push(...this.#getCollisions(
+            obj, 
+            Object.keys(movingObjects).map(
+              id => this.#allObjects[id])
+          ));
+          movingObjects[id] = obj;
+        }
+      }
+      Object.values(movingObjects).forEach(obj => {
+        const collidees = this.#collidibleObjectIds
+          .filter(id => !movingObjects[id])
+          .map(id => this.#allObjects[id] )    
+        collisions.push(
+          ...this.#getCollisions(obj, collidees));
+      })    
+      return collisions;
+    }
+
+    /** @param {PhysicsEntity} collider
+     *  @param {PhysicsEntity[]} collidees
+     *  @returns {{
+     *    collider: PhysicsEntity,
+     *    collidee: PhysicsEntity
+     *  }[]}
+     */
+    #getCollisions(collider, collidees) {
+      const collisions = [];
+      collidees.forEach(collidee => {
+        if (this.#detectCollision(collider, collidee)) {
+          collisions.push({ collider, collidee });
+        }
+      })
+      return collisions;
+    }
+
+    /** @param {PhysicsEntity} collider
+     *  @param {PhysicsEntity} collidee
+     */
+    #detectCollision(collider, collidee) {
+
+      const circle = collider.isShape("CIRCLE") ? collider
+        : (collidee.isShape("CIRCLE") ? collidee: null);
+      if (circle) {
+        if (collider.isShape("CIRCLE") &&
+          collidee.isShape("CIRCLE")) {
+          throw "Not implemented circle and circle collision";
+        }
+        const rect = circle == collider ? collidee: collider;
+        return isCircleCollideRect(circle, rect);
+      }
+      if (collider.isShape("RECTANGLE") &&
+        collidee.isShape("RECTANGLE")) {
+        return isRectCollideRect(collider, collidee); 
+      }
+      throw "Not implemented collision type " + collider.shape + " + " + collidee.shape;
     }
   }
-
-  /** @param {PhysicsEntity} collider
-   *  @param {PhysicsEntity} collidee
-   */
-  #resolveCollideWithDynamic(collider, collidee) {
-    throw "dynamic + dynamic collision not implemented";
-  }
-
-  #getAllCollisions() {
-    const movingObjects = {};
-    const collisions = [];
-    for (let id in this.#allObjects) {
-      const obj = this.#allObjects[id];
-      if (obj && obj.isMoving) {
-        collisions.push(...this.#getCollisions(
-          obj, 
-          Object.keys(movingObjects).map(
-            id => this.#allObjects[id])
-        ));
-        movingObjects[id] = obj;
-      }
-    }
-    Object.values(movingObjects).forEach(obj => {
-      const collidees = this.#collidibleObjectIds
-        .filter(id => !movingObjects[id])
-        .map(id => this.#allObjects[id] )    
-      collisions.push(
-        ...this.#getCollisions(obj, collidees));
-    })    
-    return collisions;
-  }
-
-  /** @param {PhysicsEntity} collider
-   *  @param {PhysicsEntity[]} collidees
-   *  @returns {{
-   *    collider: PhysicsEntity,
-   *    collidee: PhysicsEntity
-   *  }[]}
-   */
-  #getCollisions(collider, collidees) {
-    const collisions = [];
-    collidees.forEach(collidee => {
-      if (this.#detectCollision(collider, collidee)) {
-        collisions.push({ collider, collidee });
-      }
-    })
-    return collisions;
-  }
-
-  /** @param {PhysicsEntity} collider
-   *  @param {PhysicsEntity} collidee
-   */
-  #detectCollision(collider, collidee) {
-
-    const circle = collider.isShape("CIRCLE") ? collider
-      : (collidee.isShape("CIRCLE") ? collidee: null);
-    if (circle) {
-      if (collider.isShape("CIRCLE") &&
-        collidee.isShape("CIRCLE")) {
-        throw "Not implemented circle and circle collision";
-      }
-      const rect = circle == collider ? collidee: collider;
-      return isCircleCollideRect(circle, rect);
-    }
-    if (collider.isShape("RECTANGLE") &&
-      collidee.isShape("RECTANGLE")) {
-      return isRectCollideRect(collider, collidee); 
-    }
-    throw "Not implemented collision type " + collider.shape + " + " + collidee.shape;
-  }
-}

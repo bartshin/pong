@@ -1,6 +1,16 @@
 <game-view class="page">
-  <h1>game view</h1>
+  <div style="display: flex; justify-content: space-around; width: 90vw;">
+    <button id="start-button" style="margin-left: 2em">Start</button>
+    <div id="score-container" 
+         data-for="player in players" 
+         style="display: flex; flex-direction: row; padding: 0.5em;">
+      <span style="margin-right: 0.5em">{{player.nickname}}</span>
+      <span class="score-placeholder" 
+            style="margin-right: 1.5em;"
+        data-player={{player.nickname}}>0</span>
+    </div>
+  </div>
   <div class="canvas_container">
-  <canvas class="game_canvas"></canvas>
-</div>
+    <canvas class="game_canvas"></canvas>
+  </div>
 </game-view>

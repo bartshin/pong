@@ -43,6 +43,8 @@ export default class PhysicsEntity {
   #type;
   /** @type {string} */
   #collideType;
+  /** @type {any} */
+  data = null;
 
   /** @params {Object} params
    *  @param {{

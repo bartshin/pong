@@ -4,18 +4,38 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import PhysicsEntity from "@/game/physicsEntity";
 import { EPSILON } from "@/game/physicsUtils";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
+import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader'
+import { GameData, Player } from "@/data/game_data";
+import ObservableObject from "@/lib/observable_object";
 
-const FRAME_TIME_TRESHOLD = 0.01;
+const FRAME_TIME_THRESHOLD = 0.01;
 const MAX_PEDDLE_SPEED = 30;
 const PEDDLE_ACCEL = 5;
 const PEDDLE_DECEL_RATIO = 0.5;
-const SOUND_EFFECT_THRESHOLD = 0.1;
+const SOUND_EFFECT_THRESHOLD = 0.3;
+
+const WALL_TYPES = Object.freeze({
+  safeWall: "SAFE",
+  trapWall: "TRAP",
+});
+
+const DIRECTION = Object.freeze({
+  top: "TOP",
+  bottom: "BOTTOM",
+  LEFT: "LEFT",
+  RIGHT: "RIGHT"
+});
+
+const PLAYER_POSITION = Object.freeze({
+  [DIRECTION.top]: 0,
+  [DIRECTION.bottom]: 1,
+});
 
 /** @type {{
  *    [key: string] : {
- *      player: Number,
- *      x: Number,
- *      y: Number,
+ *      player: number,
+ *      x: number,
+ *      y: number,
  *    }
  *  }}
  */
@@ -30,12 +50,12 @@ const controlMap = {
     x: 1,
     y: 0,
   },
-  "a": {
+  "-": {
     player: 1, 
     x: -1,
     y: 0,
   },
-  "d": {
+  "=": {
     player: 1, 
     x: 1,
     y: 0,
@@ -50,6 +70,9 @@ export default class Scene {
 
   #physics;
   #scene;
+  #gameData;
+  /** @type {"TOP" | "BOTTOM" | null} */
+  #lostSide = null;
   #gameScene;
   #canvas;
   #windowSize;
@@ -61,25 +84,33 @@ export default class Scene {
   
   /** @type {{
    *   clock: THREE.Clock,
-   *   elapsed: Number
+   *   elapsed: number
   * }} */
   #time;
 
-  /** @type {{
+  /** @type {Array<{
    *    mesh: THREE.Mesh,
-   *    physicsId: Number
-   *  }[]}
+   *    physicsId: number
+   *  }>}
    */
   #objects = [];
+
+  /**
+   * @type {{
+   *  mesh: THREE.Mesh | null,
+   *  physicsId: number | null
+   * }} 
+   */
+  #ball = { mesh: null, physicsId: null };
   
   /** @type {{
    *    mesh: THREE.Mesh,
-   *    physicsId: Number
+   *    physicsId: number
    *  }[]}
    */
   #peddles = [];
 
-	/** @type {Number[]} */
+	/** @type {number[]} */
 	#eventsIds = [];
 
 	#hitSound = {
@@ -89,9 +120,9 @@ export default class Scene {
 
   /** @type {{
    *    pressed: {
-   *      player: Number,
-   *      x: Number,
-   *      y: Number,
+   *      player: number,
+   *      x: number,
+   *      y: number,
    *      key: string | null,
    *    }
    *   }[]}
@@ -115,17 +146,19 @@ export default class Scene {
     }
   ];
 
-  #isPlaying = true;
+  isBallMoving = false;
   #renderId = 0;
 
   /**
    * @params {Object} params
    * @param {{
-   *  canvas: HTMLCanvasElement
+   *  canvas: HTMLCanvasElement,
+   *  gameData: ObservableObject,
    * }} params
    */
-  constructor({canvas}) {
+  constructor({canvas, gameData}) {
     this.#canvas = canvas;
+    this.#gameData = gameData;
     this.#scene = new THREE.Scene();
     this.#gameScene = new THREE.Scene();
     this.#windowSize = {
@@ -182,11 +215,33 @@ export default class Scene {
       (_) => {
       },
       (error) => {
-        console.log("loade error", error);
-      }
+        console.error("load error", error);
+        }
     )
 
+    
+    const rgbeLoader = new RGBELoader();
+    rgbeLoader.load("resources/night_field.hdr",
+      (environmentMap) =>
+{
+   environmentMap.mapping = THREE.EquirectangularReflectionMapping;
+
+    this.#scene.background = environmentMap;
+    this.#scene.environment = environmentMap;
+    this.#scene.backgroundIntensity = 1;
+})
+
+
+const bgm = new Audio("resources/sound/bgm1.mp3");
+bgm.volume = 0.2;
+bgm.play()
+
     return this;
+  }
+
+  startGame() {
+    this.#addBall();
+    this.isBallMoving = true;
   }
 
   #init() {
@@ -200,14 +255,13 @@ export default class Scene {
   }
 
   #addObjects() {
-    this.#addBall()
-      .#addWalls()
+    this.#addWalls()
       .#addPeddles()
     return this;
   }
 
   #addBall() {
-    const ball = new THREE.Mesh(
+    const mesh = new THREE.Mesh(
       new THREE.SphereGeometry(1, 16, 16),
       new THREE.MeshStandardMaterial({
         color: 0xff0000,
@@ -215,53 +269,77 @@ export default class Scene {
         roughness: 0.4
       })
     );
-    ball.position.set(0, 0, 0);
-    const ballPysics = PhysicsEntity.createCircle({
+    mesh.position.set(0, 0, 0);
+    const ballPhysics = PhysicsEntity.createCircle({
       type: "MOVABLE",
       collideType: "DYNAMIC",
       radius: 1,
       center: { x: 0, y:0 }
     });
-    ballPysics.veolocity = {
+    ballPhysics.veolocity = {
       x: 10,
       y: 15
     };
-    const ballId = this.#physics.addObject(ballPysics)[0];
+    const physicsId = this.#physics.addObject(ballPhysics)[0];
 
     this.#objects.push(
       {
-        mesh: ball,
-        physicsId: ballId
+        mesh,
+        physicsId
       },
     );
-    this.#gameScene.add(ball);
+    this.#gameScene.add(mesh);
+    this.#ball = {
+      mesh,
+      physicsId
+    };
     return this;
   }
 
   #addWalls() {
-    this.#addWall({ width: 1, height: 40, }, 
+    const safeWalls = this.#addWall({ width: 1, height: 40, }, 
       [
         { x: -10, y: 0 },
         { x: 10, y: 0 }
       ]
     );
-    this.#addWall({ width: 20, height:1 },
+
+    safeWalls[0].data = {
+      wallType: WALL_TYPES.safeWall,
+      direction: DIRECTION.LEFT,
+    };
+    
+    safeWalls[1].data = {
+      wallType: WALL_TYPES.safeWall,
+      direction: DIRECTION.RIGHT,
+    };
+
+    const trapWalls = this.#addWall({ width: 20, height:1 },
       [
         { x: 0, y: 20 },
         { x: 0, y: -20 }
       ]
     );
 
+    trapWalls[0].data = {
+      wallType: WALL_TYPES.trapWall,
+      direction: DIRECTION.top
+    };
+
+    trapWalls[1].data = {
+      wallType: WALL_TYPES.trapWall,
+      direction: DIRECTION.bottom
+    };
     return this;
   }
 
   /** @param {{
-    *   width: Number,
-    *   height: Number
+    *   width: number,
+    *   height: number
     * }} wallSize
     * @param {{
-    *   x: Number,
-    *   y: Number
+    *   x: number,
+    *   y: number
     * }[]} wallPositions
     */
   #addWall(wallSize, wallPositions) {
@@ -280,8 +358,8 @@ export default class Scene {
       );
       mesh.position.set(pos.x, pos.y, 0);
       return mesh;
-    }
-    );
+    });
+
     const wallPhysics = wallPositions.map(pos => {
         return PhysicsEntity.createRect({
           type: "IMMOVABLE",
@@ -304,6 +382,7 @@ export default class Scene {
       );
     }
     this.#gameScene.add(...wallMeshes);
+    return wallPhysics;
   }
 
   #addPeddles() {
@@ -330,11 +409,11 @@ export default class Scene {
     const positions = [
       {
         x: 0,
-        y: -10
+        y: -15
       },
       {
         x: 0,
-        y: 10
+        y: 15
       }
     ];
     const meshes = materials.map((material, index) => {
@@ -381,7 +460,7 @@ export default class Scene {
     directionalLight.shadow.mapSize.set(1024, 1024);
     directionalLight.shadow.camera.far = 15;
     directionalLight.position.set(5, 5, 2);
-    this.#scene.add(ambientLight, directionalLight);
+    //   this.#scene.add(ambientLight, directionalLight);
 
     const gameAmbientLight = new THREE.AmbientLight(0xffffff, 2.1);
     const gameDirectionalLight = new THREE.DirectionalLight(
@@ -446,7 +525,7 @@ export default class Scene {
   #addVisibleCallback() {
     
     const onVisibilityChange = ( /** @param {Boolean} visible */ (visible) => {
-      this.#isPlaying = visible;
+      this.isBallMoving = visible;
       if (visible) {
         this.#startRender();         
       }
@@ -525,8 +604,14 @@ export default class Scene {
 				return false;
 			},
 			(collider, collidee, time) => {
+        if (collidee.data && collidee.data.wallType &&
+        collidee.data.wallType == WALL_TYPES.trapWall) {
+          this.#lostSide = collidee.data.direction;
+          this.isBallMoving = false;
+        }
 				this.#hitSound.sound.currentTime = 0;
 				this.#hitSound.sound.play();
+        this.#hitSound.sound.volume = 1;
 				this.#hitSound.time = this.#time.elapsed;
 			}
 		);
@@ -534,49 +619,97 @@ export default class Scene {
 		return this;
 	}
 
+  /**
+   * @param {{
+   *  frameTime: number,
+   *  frameSlice: number
+   * }} args
+   */
+  #updateObjects({frameTime, frameSlice}) {
+
+    this.#peddles.forEach((peddle, index) => {
+      const control = this.#peddleControls[index];
+      this.#physics.setState(peddle.physicsId,
+        (state) => {
+          let vel = { ...state.velocity };
+          if (control.pressed.x == 0) {
+            vel.x = Math.abs(vel.x) < EPSILON ? 0: vel.x * PEDDLE_DECEL_RATIO;
+          }
+          else if (control.pressed.x > 0) {
+            vel.x = Math.min(MAX_PEDDLE_SPEED, vel.x + PEDDLE_ACCEL);
+          }
+          else {
+            vel.x = Math.max(-MAX_PEDDLE_SPEED, vel.x - PEDDLE_ACCEL);
+          }
+          return { velocity: {
+            ...vel
+          }};
+        })
+    })
+    while (frameTime > EPSILON) {
+      this.#physics.update(frameSlice);
+      frameTime -= frameSlice; 
+      frameSlice = Math.min(frameTime, FRAME_TIME_THRESHOLD);
+    }
+    const states = this.#physics.allStates;
+    this.#objects.forEach(({mesh, physicsId}) => {
+      if (!states[physicsId])
+        return ;
+      const position = states[physicsId].position;
+      mesh.position.set(position.x, position.y, mesh.position.z);
+    })
+  }
+
+  #removeBall() {
+    const mesh = this.#ball.mesh;
+    const id = this.#ball.physicsId
+    this.#physics.removeCollisionCallback(id);
+    this.#physics.removeObject(id);
+    this.#gameScene.remove(mesh);
+    this.#ball.mesh = null;
+    this.#ball.physicsId = null;
+    return this;
+  }
+
+  #updateGameData() {
+    if (!this.#lostSide)
+      return ;
+    /** @type {GameData} */ //@ts-ignore: casting
+    const gameData = this.#gameData;
+    /** @type {Player[]} */
+    const players = gameData.getPlayers();
+    if (this.#lostSide != DIRECTION.top && 
+      this.#lostSide != DIRECTION.bottom) {
+      throw "invalid side " + this.#lostSide;
+    }
+    const winSide = this.#lostSide == DIRECTION.top ? DIRECTION.bottom: DIRECTION.top;
+    const winPlayer = players[PLAYER_POSITION[winSide]];
+    const newScores = {...gameData.scores}
+    newScores[winPlayer.nickname] += 1;
+    gameData.scores = newScores;
+    this.#lostSide = null;
+    return this;
+  }
+
   #startRender() {
     const tick = (() => {
       const elapsed = this.#time.clock.getElapsedTime();
       let frameTime = elapsed - this.#time.elapsed;
       this.#time.elapsed = elapsed;
-      let frameSlice = Math.min(frameTime, FRAME_TIME_TRESHOLD);
-      this.#peddles.forEach((peddle, index) => {
-        const control = this.#peddleControls[index];
-        this.#physics.setState(peddle.physicsId,
-          (state) => {
-            let vel = { ...state.velocity };
-            if (control.pressed.x == 0) {
-              vel.x = Math.abs(vel.x) < EPSILON ? 0: vel.x * PEDDLE_DECEL_RATIO;
-            }
-            else if (control.pressed.x > 0) {
-              vel.x = Math.min(MAX_PEDDLE_SPEED, vel.x + PEDDLE_ACCEL);
-            }
-            else {
-              vel.x = Math.max(-MAX_PEDDLE_SPEED, vel.x - PEDDLE_ACCEL);
-            }
-            return { velocity: {
-              ...vel
-            }};
-        })
-      })
-      while (frameTime > EPSILON) {
-        this.#physics.update(frameSlice);
-        frameTime -= frameSlice; 
-        frameSlice = Math.min(frameTime, FRAME_TIME_TRESHOLD);
+      let frameSlice = Math.min(frameTime, FRAME_TIME_THRESHOLD);
+      this.#renderId = window.requestAnimationFrame(tick);
+      if (!this.isBallMoving && 
+        this.#ball.mesh && this.#ball.physicsId) {
+        this.#removeBall()
+        .#updateGameData();
+        this.isBallMoving = true;
       }
-      const states = this.#physics.allStates;
-      this.#objects.forEach(({mesh, physicsId}) => {
-        if (!states[physicsId])
-          return ;
-        const position = states[physicsId].position;
-        mesh.position.set(position.x, position.y, mesh.position.z);
-      })
+      this.#updateObjects({frameTime, frameSlice})
       this.#renderer.render(this.#scene, this.#camera);
       this.#renderer.autoClear = false;
       this.#renderer.render(this.#gameScene, this.#camera);
       this.#renderer.autoClear = true;
       this.controls.update();
-      this.#renderId = window.requestAnimationFrame(tick);
     }).bind(this);
 
     tick();

@@ -1,7 +1,7 @@
 {
 	"compilerOptions": {
-		"target": "esnext",
-		"module": "exnext",
+		"target": "es2015",
+		"module": "ex2015",
 		"allowJs": true,
 		"checkJs": true,
     "lib": ["ex2021", "dom"],
