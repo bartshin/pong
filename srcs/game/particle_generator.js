@@ -8,8 +8,8 @@ import * as THREE_UTIL from "@/utils/three_util.js";
 export default class ParticleGenerator {
 
   static shaderPath = {
-    vertex: "pong/shader/galaxy_v.glsl",
-    fragment: "pong/shader/galaxy_f.glsl",
+    vertex: "/shader/galaxy_v.glsl",
+    fragment: "/shader/galaxy_f.glsl",
   }
 
   /** @type {THREE_UTIL.ShaderLoadContext} */
