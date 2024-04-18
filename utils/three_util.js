@@ -27,7 +27,7 @@ export function loadShaders(context) {
     return;
   context.loadStarted = true;
   const promises = Object.entries(context.path).map(([key, path]) => 
-    fetch("pong/" + path)
+    fetch(path)
     .then(res => res.text())
     .then(loadedShader => {
       context.loadedShader[key] = loadedShader 
