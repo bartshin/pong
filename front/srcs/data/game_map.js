@@ -229,14 +229,14 @@ const exampleWalls = [
     safeWalls: [ 
       {
         centerX: 50,
-        centerY: 30,
-        width: 30,
+        centerY: 35,
+        width: 20,
         height: 5,
       },
       {
         centerX: 50,
-        centerY: 70,
-        width: 30,
+        centerY: 65,
+        width: 20,
         height: 5,
       }
     ]
@@ -244,16 +244,16 @@ const exampleWalls = [
   {
     safeWalls: [ 
       {
-        centerX: 20,
+        centerX: 30,
         centerY: 35,
-        width: 30,
-        height: 20,
+        width: 20,
+        height: 15,
       },
       {
-        centerX: 80,
+        centerX: 70,
         centerY: 65,
-        width: 30,
-        height: 20,
+        width: 20,
+        height: 15,
       },
     ]
   },
@@ -263,13 +263,13 @@ const exampleWalls = [
         centerX: 30,
         centerY: 50,
         width: 10,
-        height: 60,
+        height: 40,
       },
       {
         centerX: 70,
         centerY: 50,
         width: 10,
-        height: 60,
+        height: 40,
       },
     ]
   },

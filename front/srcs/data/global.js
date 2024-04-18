@@ -74,8 +74,9 @@ const globalData = (() =>{
     })
   );
   let mapIndex = 2;
-  if (hash && ["0", "1", "2", "3", "4"].indexOf(hash) != -1) {
-    mapIndex = parseInt(hash);
+  const hashIndex = hash.replace("#", "");
+  if (hash && ["0", "1", "2", "3", "4"].indexOf(hashIndex) != -1) {
+    mapIndex = parseInt(hashIndex);
   }
   else {
     mapIndex = Math.floor(Math.random() * examples.length);

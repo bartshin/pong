@@ -110,7 +110,7 @@ export default class GameData {
       x: -1,
       y: 0,
     },
-    "s": {
+    "d": {
       player: 1, 
       type: "MOVE",
       x: 1,
