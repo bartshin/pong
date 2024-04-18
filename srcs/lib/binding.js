@@ -1,4 +1,4 @@
-import Observable from "@/lib/observable";
+import Observable from "@/lib/observable.js";
 
 /**
  * binding observable data with html element

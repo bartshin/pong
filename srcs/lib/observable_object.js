@@ -1,6 +1,6 @@
 //@ts-nocheck
 
-import { DEBUG } from "@/data/global";
+import { DEBUG } from "@/data/global.js";
 
 /**
  * ObservableObject wrapper

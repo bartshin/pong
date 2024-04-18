@@ -1,4 +1,4 @@
-import { DEBUG } from "./global";
+import { DEBUG } from "@/data/global.js";
 
 export const POWER_UP_CONFIG = {
   defaultDuration: 3,

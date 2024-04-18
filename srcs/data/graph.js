@@ -1,6 +1,6 @@
 /** @typedef { "LINE" | "BAR" | "PIE" } GraphType */
 
-import { DEBUG } from "./global";
+import { DEBUG } from "@/data/global.js";
 
 export default class GraphData {
 

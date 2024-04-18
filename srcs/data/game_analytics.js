@@ -1,6 +1,6 @@
-import GameData, { GAME_TYPE } from "@/data/game_data";
-import GameDataEmitter, * as GDE from "@/game/game_data_emitter";
-import { MAP_SIZE } from "@/data/game_map";
+import GameData, { GAME_TYPE } from "@/data/game_data.js";
+import GameDataEmitter, * as GDE from "@/game/game_data_emitter.js";
+import { MAP_SIZE } from "@/data/game_map.js";
 import GraphData,  * as GH from "@/data/graph.js"
 
 /** @typedef { "RALLY"| "MATCH"| "TOURNAMENT" } Time */

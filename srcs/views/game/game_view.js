@@ -1,17 +1,17 @@
-import View from "@/lib/view";
-import Scene from "@/game/scene";
-import GameData,{ GAME_TYPE } from "@/data/game_data";
-import ObservableObject from "@/lib/observable_object";
-import { GameMap, WALL_TYPES } from "@/data/game_map";
-import TournamentPanel from "@/views/components/tournament_panel";
-import * as PU from "@/data/power_up";
-import Asset from "@/game/asset";
+import View from "@/lib/view.js";
+import Scene from "@/game/scene.js";
+import GameData,{ GAME_TYPE } from "@/data/game_data.js";
+import ObservableObject from "@/lib/observable_object.js";
+import { GameMap, WALL_TYPES } from "@/data/game_map.js";
+import TournamentPanel from "@/views/components/tournament_panel.js";
+import * as PU from "@/data/power_up.js";
+import Asset from "@/game/asset.js";
 import ColorPicker from "@/views/components/color_picker.js";
-import Observable from "@/lib/observable";
-import { getRandomFromArray } from "@/utils/type_util";
-import GameDataEmitter from "@/game/game_data_emitter";
-import globalData, { DEBUG, STATE } from "@/data/global";
-import { NAVIGATE_DRIRECTION, route } from "@/router";
+import Observable from "@/lib/observable.js";
+import { getRandomFromArray } from "@/utils/type_util.js";
+import GameDataEmitter from "@/game/game_data_emitter.js";
+import globalData, { DEBUG, STATE } from "@/data/global.js";
+import { NAVIGATE_DRIRECTION, route } from "@/router.js";
 import ResultModal from "@/views/components/result_modal.js";
 
 export default class GameView extends View {

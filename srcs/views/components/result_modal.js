@@ -1,4 +1,4 @@
-import View from "@/lib/view";
+import View from "@/lib/view.js";
 
 export default class ResultModal extends View {
 

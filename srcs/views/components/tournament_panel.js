@@ -1,6 +1,6 @@
-import GameData from "@/data/game_data";
-import { DEBUG } from "@/data/global";
-import View from "@/lib/view";
+import GameData from "@/data/game_data.js";
+import { DEBUG } from "@/data/global.js";
+import View from "@/lib/view.js";
 
 /** @typedef {Object} Match 
  *  @property {{
