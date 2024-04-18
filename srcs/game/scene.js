@@ -1,20 +1,20 @@
 import * as THREE from "https://unpkg.com/three@0.161.0/build/three.module.js";
 //import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
-import GameData,{ GAME_TYPE } from "@/data/game_data";
-import Player from "@/data/player";
-import ParticleGenerator from "@/game/particle_generator";
-import ObservableObject from "@/lib/observable_object";
-import { Animation, AnimationCurves } from "@/game/animation";
-import { GameMap } from "@/data/game_map";
-import LeafGenerator from "@/game/leaf_generator";
-import ImageGenerator from "@/utils/image_generator";
-import UserLabel from "@/views/components/user_label";
-import ASSET_PATH from "@/assets/path";
-import Asset from "@/game/asset";
-import GameScene from "@/game/game_scene";
-import Timer from "@/game/timer";
-import GameDataEmitter from "@/game/game_data_emitter";
-import { DEBUG } from "@/data/global";
+import GameData,{ GAME_TYPE } from "@/data/game_data.js";
+import Player from "@/data/player.js";
+import ParticleGenerator from "@/game/particle_generator.js";
+import ObservableObject from "@/lib/observable_object.js";
+import { Animation, AnimationCurves } from "@/game/animation.js";
+import { GameMap } from "@/data/game_map.js";
+import LeafGenerator from "@/game/leaf_generator.js";
+import ImageGenerator from "@/utils/image_generator.js";
+import UserLabel from "@/views/components/user_label.js";
+import ASSET_PATH from "@/assets/path.js";
+import Asset from "@/game/asset.js";
+import GameScene from "@/game/game_scene.js";
+import Timer from "@/game/timer.js";
+import GameDataEmitter from "@/game/game_data_emitter.js";
+import { DEBUG } from "@/data/global.js";
 
 /**
  * Game Scene.

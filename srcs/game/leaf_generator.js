@@ -1,7 +1,7 @@
 import * as THREE from "https://unpkg.com/three@0.161.0/build/three.module.js";
-import { Animation, AnimationCurves } from "@/game/animation";
-import Asset from "@/game/asset";
-import ASSET_PATH from "@/assets/path";
+import { Animation, AnimationCurves } from "@/game/animation.js";
+import Asset from "@/game/asset.js";
+import ASSET_PATH from "@/assets/path.js";
 
 /** LeafGenerator. */
 export default class LeafGenerator {

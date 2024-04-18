@@ -1,20 +1,20 @@
 import * as THREE from "https://unpkg.com/three@0.161.0/build/three.module.js";
-import Asset from "@/game/asset";
-import ASSET_PATH from "@/assets/path";
-import Physics from "@/game/physics";
-import { EPSILON } from "@/game/physics_utils";
-import PhysicsEntity from "@/game/physics_entity";
-import GameData  from "@/data/game_data";
-import Player, { PLAYER_POSITION } from "@/data/player";
-import ParticleGenerator from "@/game/particle_generator";
-import { WALL_TYPES, DIRECTION, GameMap } from "@/data/game_map";
-import { resizeTexture } from "@/utils/three_util";
-import Timer from "@/game/timer";
-import PowerUp, { POWER_UP_CONFIG } from "@/data/power_up";
-import * as THREE_UTIL from "@/utils/three_util";
-import Observable from "@/lib/observable";
-import CONFIG from "@/game/config";
-import { DEBUG } from "@/data/global";
+import Asset from "@/game/asset.js";
+import ASSET_PATH from "@/assets/path.js";
+import Physics from "@/game/physics.js";
+import { EPSILON } from "@/game/physics_utils.js";
+import PhysicsEntity from "@/game/physics_entity.js";
+import GameData  from "@/data/game_data.js";
+import Player, { PLAYER_POSITION } from "@/data/player.js";
+import ParticleGenerator from "@/game/particle_generator.js";
+import { WALL_TYPES, DIRECTION, GameMap } from "@/data/game_map.js";
+import { resizeTexture } from "@/utils/three_util.js";
+import Timer from "@/game/timer.js";
+import PowerUp, { POWER_UP_CONFIG } from "@/data/power_up.js";
+import * as THREE_UTIL from "@/utils/three_util.js";
+import Observable from "@/lib/observable.js";
+import CONFIG from "@/game/config.js";
+import { DEBUG } from "@/data/global.js";
 
 
 export default class GameScene extends THREE.Group {

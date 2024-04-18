@@ -1,5 +1,5 @@
 import * as THREE from "https://unpkg.com/three@0.161.0/build/three.module.js";
-import Observable from "@/lib/observable";
+import Observable from "@/lib/observable.js";
 
 export default class Timer {
 

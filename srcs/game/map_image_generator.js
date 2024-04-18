@@ -7,8 +7,8 @@
  *  @property {number} centerY
 */
 
-import { GameMap, WALL_TYPES } from "@/data/game_map";
-import { DEBUG } from "@/data/global";
+import { GameMap, WALL_TYPES } from "@/data/game_map.js";
+import { DEBUG } from "@/data/global.js";
 
 const WALL_THICKNESS_THRESHOLD = 4;
 

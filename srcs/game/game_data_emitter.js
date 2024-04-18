@@ -3,8 +3,8 @@
  *  @property { number } value
  */
 
-import { DEBUG } from "@/data/global";
-import { isEmptyObject } from "@/utils/type_util";
+import { DEBUG } from "@/data/global.js";
+import { isEmptyObject } from "@/utils/type_util.js";
 
 /** @typedef {"INSTANT" | "FLUSH" | "LAZY"} EventReactConfig */
 /** @typedef {"BALL" | "PEDDLE" | "GAME_STATE"} CollectTarget */
