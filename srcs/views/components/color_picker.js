@@ -14,8 +14,8 @@ const DEFAULT_SIZE = {
 export default class ColorPicker extends View {
 
   static shaderPath = {
-    vertex: "srcs/shader/color_picker_v.glsl",
-    fragment: "srcs/shader/color_picker_f.glsl",
+    vertex: "pong/shader/color_picker_v.glsl",
+    fragment: "pong/shader/color_picker_f.glsl",
   }
 
   /** @type {THREE_UTIL.ShaderLoadContext} */
