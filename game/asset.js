@@ -1,6 +1,6 @@
-import { DEBUG } from "@/data/global";
-import Observable from "@/lib/observable";
-import ObservableObject from "@/lib/observable_object";
+import { DEBUG } from "@/data/global.js";
+import Observable from "@/lib/observable.js";
+import ObservableObject from "@/lib/observable_object.js";
 import * as THREE from "https://unpkg.com/three@0.161.0/build/three.module.js";
 import { GLTFLoader } from "https://unpkg.com/three@0.161.0/examples/jsm/loaders/GLTFLoader.js";
 

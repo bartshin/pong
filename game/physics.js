@@ -1,6 +1,6 @@
-import { DEBUG } from "@/data/global";
-import  PhysicsEntity, { isCircleCollideRect, isRectCollideRect } from "@/game/physics_entity"
-import { isEqualF } from "@/game/physics_utils";
+import { DEBUG } from "@/data/global.js";
+import  PhysicsEntity, { isCircleCollideRect, isRectCollideRect } from "@/game/physics_entity.js"
+import { isEqualF } from "@/game/physics_utils.js";
 
 export default class Physics {
 

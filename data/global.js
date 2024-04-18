@@ -1,7 +1,5 @@
 import ObservableObject from "@/lib/observable_object.js";
 import GameData from "@/data/game_data.js";
-import GameAnalytics from "@/data/game_analytics.js";
-import { generateRandomName } from "@/utils/random_name.js";
 import { GameMap, examples }  from "@/data/game_map.js";
 
 /** @typedef {(params: {

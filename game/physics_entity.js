@@ -1,4 +1,4 @@
-import { distSquared2D, isEqualF, isEqual2D } from "@/game/physics_utils";
+import { distSquared2D, isEqualF, isEqual2D } from "@/game/physics_utils.js";
 
 export class PhysicsType {
 
