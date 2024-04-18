@@ -1,5 +1,4 @@
 import ObservableObject from "@/lib/observable_object";
-import User, { createProfile } from "@/data/user";
 import GameData from "@/data/game_data";
 import GameAnalytics from "@/data/game_analytics";
 import { generateRandomName } from "@/utils/random_name.js";
