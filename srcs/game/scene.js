@@ -1,5 +1,5 @@
-import * as THREE from "three";
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
+import * as THREE from "https://unpkg.com/three@0.161.0/build/three.module.js";
+//import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import GameData,{ GAME_TYPE } from "@/data/game_data";
 import Player from "@/data/player";
 import ParticleGenerator from "@/game/particle_generator";

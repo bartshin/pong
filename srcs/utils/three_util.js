@@ -10,7 +10,7 @@
  *  }} loadedShader
  *}} */ 
 import { DEBUG } from "@/data/global";
-import * as THREE from "three";
+import * as THREE from "https://unpkg.com/three@0.161.0/build/three.module.js";
 
 export function resizeTexture({texture, x, y}) {
   texture.repeat.x = x;

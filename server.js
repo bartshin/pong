@@ -10,23 +10,15 @@ app.use((req, res, next) => {
     next();
 });
 
-app.use("/srcs", express.static(path.resolve(__dirname, "front", "srcs"), 
+app.use("/srcs", express.static(path.resolve(__dirname, "srcs"), 
   { extensions: ["js"] }
 ));
 
-app.use("/assets", express.static(path.resolve(__dirname, "front", "srcs", "assets")));
-
-app.use("/three", express.static(path.resolve(__dirname, "node_modules", "three"), 
-  { extensions: ["js"] }
-));
-
-app.use("/node_modules", express.static(path.resolve(__dirname, "node_modules"),
-  { extensions: ["js"] }
-));
+app.use("/assets", express.static(path.resolve(__dirname, "srcs", "assets")));
 
 
 app.get("/*", (req, res, next) => {
-  res.sendFile(path.resolve("front/srcs", "index.html"));
+  res.sendFile(path.resolve("srcs", "index.html"));
 });
 
 app.listen(8080, () => console.log("Server running"));

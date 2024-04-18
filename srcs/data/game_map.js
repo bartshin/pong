@@ -8,7 +8,17 @@
  *  @property {number} centerY
 */
 
-import { clamp } from "three/src/math/MathUtils";
+/** @param { number } value
+ *  @param { number } min
+ *  @param { number } max
+ */
+function clamp(value, min, max) {
+  if (value < min)
+    return min;
+  else if (value > max)
+    return max;
+  return value;
+}
 
 export const MAP_SIZE = Object.freeze({
   width: 100,

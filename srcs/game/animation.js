@@ -1,5 +1,4 @@
-import { Vector2, Vector3 } from "three";
-
+import * as THREE from "https://unpkg.com/three@0.161.0/build/three.module.js";
 
 export const AnimationCurves = {
   smoothstep: (t) => {
@@ -27,9 +26,9 @@ const TYPES = Object.freeze({
  */
 export class Animation {
 
-  /** @type {Vector3 | Vector2 | number} */ 
+  /** @type {THREE.Vector3 | THREE.Vector2 | number} */ 
   #start;
-  /** @type {Vector3 | Vector2 | number} */
+  /** @type {THREE.Vector3 | THREE.Vector2 | number} */
   #end;
   /** @type {boolean} */
   #repeat
@@ -37,7 +36,7 @@ export class Animation {
   #curve;
   #_type;
 
-  /** @type {Vector3 | Vector2 | number} */
+  /** @type {THREE.Vector3 | THREE.Vector2 | number} */
   #dir;
   /** @type {number} */
   #_progress = 0;
@@ -53,8 +52,8 @@ export class Animation {
   /**
    * constructor.
    * @param {{
-   *  start: Vector3 | Vector2 | number,
-   *  end: Vector3 | Vector2 | number,
+   *  start: THREE.Vector3 | THREE.Vector2 | number,
+   *  end: THREE.Vector3 | THREE.Vector2 | number,
    *  repeat: boolean,
    *  key?: string,
    *  curve: (t: number) => number,
@@ -64,14 +63,14 @@ export class Animation {
     this.#start = start;  
     this.#end = end;
     this.#repeat = repeat;
-    if (start instanceof Vector3 && end instanceof Vector3) {
-      this.#dir = new Vector3().subVectors(end, start);
+    if (start instanceof THREE.Vector3 && end instanceof THREE.Vector3) {
+      this.#dir = new THREE.Vector3().subVectors(end, start);
       this.#length = this.#dir.length();
       this.#dir.normalize();
       this.#_type = TYPES.vector3;
     }
-    else if (start instanceof Vector2 && end instanceof Vector2) {
-      this.#dir = new Vector2().subVectors(end, start);
+    else if (start instanceof THREE.Vector2 && end instanceof THREE.Vector2) {
+      this.#dir = new THREE.Vector2().subVectors(end, start);
       this.#length = this.#dir.length();
       this.#dir.normalize();
       this.#_type = TYPES.vector2;

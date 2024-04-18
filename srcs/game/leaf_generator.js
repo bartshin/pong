@@ -1,6 +1,5 @@
-import * as THREE from "three";
+import * as THREE from "https://unpkg.com/three@0.161.0/build/three.module.js";
 import { Animation, AnimationCurves } from "@/game/animation";
-import { Vector3 } from "three";
 import Asset from "@/game/asset";
 import ASSET_PATH from "@/assets/path";
 
@@ -97,12 +96,12 @@ export default class LeafGenerator {
     return ({
       leaf: mesh,
       rotating: new Animation({
-        start: new Vector3(
+        start: new THREE.Vector3(
           startAngle.x,
           startAngle.y,
           startAngle.z
         ),
-        end: new Vector3(
+        end: new THREE.Vector3(
           endAngle.x,
           endAngle.y,
           endAngle.z,
@@ -113,7 +112,7 @@ export default class LeafGenerator {
       }),
       falling: new Animation({
         start: mesh.position.clone(),
-        end: new Vector3(
+        end: new THREE.Vector3(
           mesh.position.x + (Math.random() - 0.5) * bound.x * 0.5,
           0,
           mesh.position.z + (Math.random() - 0.5) * bound.z * 0.5),

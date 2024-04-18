@@ -1,4 +1,4 @@
-import * as THREE from "three";
+import * as THREE from "https://unpkg.com/three@0.161.0/build/three.module.js";
 import Asset from "@/game/asset";
 import ASSET_PATH from "@/assets/path";
 import Physics from "@/game/physics";
