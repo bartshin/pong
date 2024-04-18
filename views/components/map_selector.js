@@ -1,7 +1,7 @@
-import View from "@/lib/view";
-import MapImageGenarator from "@/game/map_image_generator";
-import { GameMap, examples } from "@/data/game_map";
-import ASSET_PATH from "@/assets/path";
+import View from "@/lib/view.js";
+import MapImageGenarator from "@/game/map_image_generator.js";
+import { GameMap, examples } from "@/data/game_map.js";
+import ASSET_PATH from "@/assets/path.js";
 
 
 export default class MapSelector extends View {

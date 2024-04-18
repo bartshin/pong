@@ -1,6 +1,6 @@
 //@ts-nocheck
-import CONFIG, { viewConstructors } from  "@/views/config";
-import View from "@/lib/view";
+import CONFIG, { viewConstructors } from  "@/views/config.js";
+import View from "@/lib/view.js";
 
 // CONFIG file path
 export default function init() {

@@ -1,5 +1,5 @@
-import Player from "@/data/player";
-import { DEBUG } from "./global";
+import Player from "@/data/player.js";
+import { DEBUG } from "@/data/global.js";
 
 /** @typedef {Object} Match 
  *  @property {{

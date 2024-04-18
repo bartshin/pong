@@ -1,9 +1,9 @@
 import * as THREE from "https://unpkg.com/three@0.161.0/build/three.module.js";
-import View from "@/lib/view";
-import { hsb2rgb } from "@/utils/color_util";
-import Observable from "@/lib/observable";
-import * as THREE_UTIL from "@/utils/three_util";
-import { DEBUG } from "@/data/global";
+import View from "@/lib/view.js";
+import { hsb2rgb } from "@/utils/color_util.js";
+import Observable from "@/lib/observable.js";
+import * as THREE_UTIL from "@/utils/three_util.js";
+import { DEBUG } from "@/data/global.js";
 
 const DEFAULT_SIZE = {
   width: 200,

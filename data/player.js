@@ -1,4 +1,4 @@
-import { DIRECTION } from "@/data/game_map";
+import { DIRECTION } from "@/data/game_map.js";
 
 /**
  * @typedef {Object} GameResult

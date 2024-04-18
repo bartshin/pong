@@ -1,7 +1,7 @@
-import View from "@/lib/view";
-import global from "@/data/global";
-import GameView from "@/views/game/game_view";
-import { routes } from "@/views/config";
+import View from "@/lib/view.js";
+import global from "@/data/global.js";
+import GameView from "@/views/game/game_view.js";
+import { routes } from "@/views/config.js";
 
 /** @typedef {Object} Page 
  *  @property {string} path

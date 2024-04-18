@@ -1,10 +1,10 @@
-import { isEmptyObject } from "@/utils/type_util";
-import { generateRandomName } from "@/utils/random_name";
-import Player from "@/data/player";
-import Tournament, * as TM from "@/data/tournament";
-import * as PU from "@/data/power_up";
-import CONFIG from "@/game/config";
-import { DEBUG } from "./global";
+import { isEmptyObject } from "@/utils/type_util.js";
+import { generateRandomName } from "@/utils/random_name.js";
+import Player from "@/data/player.js";
+import Tournament, * as TM from "@/data/tournament.js";
+import * as PU from "@/data/power_up.js";
+import CONFIG from "@/game/config.js";
+import { DEBUG } from "@/data/global.js";
 
 export const GAME_TYPE = Object.freeze({
   local1on1: "LOCAL_1ON1",

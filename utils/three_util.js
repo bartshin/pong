@@ -9,7 +9,7 @@
  *    [key in string]: string
  *  }} loadedShader
  *}} */ 
-import { DEBUG } from "@/data/global";
+import { DEBUG } from "@/data/global.js";
 import * as THREE from "https://unpkg.com/three@0.161.0/build/three.module.js";
 
 export function resizeTexture({texture, x, y}) {

@@ -1,6 +1,6 @@
-import init from "@/init";
-import { anchorToLink, route, NAVIGATE_DRIRECTION } from "@/router";
-import { DEBUG } from "@/data/global";
+import init from "@/init.js";
+import { anchorToLink, route, NAVIGATE_DRIRECTION } from "@/router.js";
+import { DEBUG } from "@/data/global.js";
 
 document.addEventListener("DOMContentLoaded", async () => {
   init();
