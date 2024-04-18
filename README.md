@@ -1,5 +1,6 @@
 ## Classic Pong game with Three js 
 - Thank you  Bruno Simon for Three JS jounrney!
+- Thank you Nico for teaching vanilla JS!
 - Compitable with Google Chrome maybe some issue with other brower
 - Default page https://bartshin.github.io/pong/ is 1 on 1 game
 - you can add #tournament+numberOfPlayers for tournarment play e.g. https://bartshin.github.io/pong/#tournament4  (and refresh if not work in Chrome)
