@@ -20,14 +20,14 @@ import { DEBUG } from "@/data/global.js";
 export default class GameScene extends THREE.Group {
 
   static peddleShaderPath = {
-    vertex: "/shader/peddle_v.glsl",
-    fragment: "/shader/peddle_f.glsl",
+    vertex: "shader/peddle_v.glsl",
+    fragment: "shader/peddle_f.glsl",
   }
 
   static ballShaderPath = {
-    vertex: "/shader/ball_v.glsl",
-    fragment: "/shader/ball_f.glsl",
-    atMosphereFragment: "/shader/ball_atmosphere_f.glsl",
+    vertex: "shader/ball_v.glsl",
+    fragment: "shader/ball_f.glsl",
+    atMosphereFragment: "shader/ball_atmosphere_f.glsl",
   };
 
   /** @type {THREE_UTIL.ShaderLoadContext} */
