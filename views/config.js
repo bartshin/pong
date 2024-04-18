@@ -10,7 +10,7 @@ import ResultModal from "@/views/components/result_modal.js";
 */
 
 export default {
-  "default_dir": "/srcs/views/",
+  "default_dir": "/pong/views/",
   "filePath": {
     "components": [
       {
