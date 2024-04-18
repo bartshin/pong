@@ -4,7 +4,7 @@
 		"module": "ex2015",
 		"allowJs": true,
 		"checkJs": true,
-    "lib": ["ex2021", "dom"],
+    "lib": ["ex2015", "dom"],
 		"maxNodeModuleJsDepth": 1,
 		"esModuleInterop": true,
 		"forceConsistentCasingInFileNames": true,

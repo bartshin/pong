@@ -1,10 +1,6 @@
 //@ts-nocheck
-import CONFIG, {viewConstructors} from  "@/views/config";
+import CONFIG, { viewConstructors } from  "@/views/config";
 import View from "@/lib/view";
-import HomeView from "@/views/home/home_view";
-import LoginView from "@/views/login/login_view";
-import GameView from "@/views/game/game_view";
-import NavBar from "@/views/components/nav_bar";
 
 // CONFIG file path
 export default function init() {

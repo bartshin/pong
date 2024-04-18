@@ -1,3 +1,5 @@
+import { DEBUG } from "@/data/global";
+
 /**
  * Observable primitive value
  */
@@ -50,7 +52,8 @@ export default class Observable {
   /** @param {(value: any) => void} listener */
   subscribe(listener) {
     if (this.#listeners.length >= Observable.MAX_LISTENER) {
-      console.error("max listener is exceeded");
+      if (DEBUG.isDebug())
+        console.error("max listener is exceeded");
       return -1;
     }
     const id = this.#listenerId++;

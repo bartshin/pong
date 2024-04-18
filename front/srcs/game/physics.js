@@ -1,5 +1,6 @@
-import  PhysicsEntity, { isCircleCollideRect, isRectCollideRect } from "@/game/physicsEntity"
-import { isEqualF } from "@/game/physicsUtils";
+import { DEBUG } from "@/data/global";
+import  PhysicsEntity, { isCircleCollideRect, isRectCollideRect } from "@/game/physics_entity"
+import { isEqualF } from "@/game/physics_utils";
 
 export default class Physics {
 
@@ -17,10 +18,12 @@ export default class Physics {
   /** @type {number[]} */
   #collidibleObjectIds = [];
 
+  #elapsedTime = 0;
+
   /** @type {{
    * [key: number]: {
-   * 		callback: (collider: PhysicsEntity, collidee: PhysicsEntity) => void,
-   *		trigger: (collider: PhysicsEntity, collidee: PhysicsEntity) => boolean,
+   * 		callback: (collider: PhysicsEntity, collidee: PhysicsEntity, time: number) => void,
+   *		trigger: (collider: PhysicsEntity, collidee: PhysicsEntity, time: number) => boolean,
    *	}
    * }} 
    */
@@ -39,6 +42,7 @@ export default class Physics {
     objs.forEach(obj => {
       const id = this.#objId++;
       ids.push(id);
+      obj["physicsId"] = id;
       this.#allObjects[id] = obj;
       if (obj.isMovable) {
         this.#movableObjects.push(id);
@@ -72,30 +76,38 @@ export default class Physics {
    *    accel?: { x: number, y: number },
    *    velocity?: { x: number, y: number },
    *    position?: { x: number, y: number }
+   *    width?: number,
+   *    height?: number
    *  }} setCallback
    */
   setState(objId, setCallback) {
     const obj = this.#allObjects[objId];
     if (!obj) {
-      console.error("Not valid object id ", objId);
+      if (DEBUG.isDebug())
+        console.error("Not: valid object id ", objId);
       return ;
     }
     const state = {
       accel: obj.acceleration,
-      velocity: obj.veolocity,
-      position: obj.position
+      velocity: obj.velocity,
+      position: obj.position,
     };
     const res = setCallback({...state});
     if (res.accel)
       obj.acceleration = res.accel;
     if (res.velocity)
-      obj.veolocity = res.velocity;
+      obj.velocity = res.velocity;
     if (res.position)
       obj.position = res.position;
+    if (res.width) 
+      obj.setWidth(res.width);
+    if (res.height)
+      obj.setHeight(res.height);
   }
 
   /**  @param {number} elapsedTime */
   update(elapsedTime) {
+    this.#elapsedTime += elapsedTime;
     this.#updateVelocities(elapsedTime)
       .#updatePositions(elapsedTime)
       .#handleCollisions()
@@ -115,7 +127,7 @@ export default class Physics {
             x: obj.midX,
             y: obj.midY
           },
-          veolocity: {...obj.veolocity}
+          velocity: {...obj.velocity}
         };
       });
     return states;
@@ -128,17 +140,21 @@ export default class Physics {
       throw "Fail to get object for " + objId;
     return ({
       position: {...obj.position},
-      veolocity: {...obj.veolocity}
+      velocity: {...obj.velocity},
+      width: obj.width,
+      height: obj.height
     });
   }
 
   /** 
-   *	@param {(collider: PhysicsEntity, collidee: PhysicsEntity) => boolean} trigger
-   * @param {(collider: PhysicsEntity, collidee: PhysicsEntity) => void} callback
+   *	@param {(collider: PhysicsEntity, collidee: PhysicsEntity, time: number) => boolean} trigger
+   * @param {(collider: PhysicsEntity, collidee: PhysicsEntity, time: number) => void} callback
    * 	@returns {number} id
    */
   addCollisionCallback(trigger, callback) {
+
     const id = this.#collideCallbackId++;
+   
     this.#collideCallbacks[id] = {
       trigger,
       callback
@@ -154,7 +170,7 @@ export default class Physics {
   #updateVelocities(elapsedTime) {
     for (let id of this.#movableObjects) {
       const obj = this.#allObjects[id];
-      const start = {...obj.veolocity};
+      const start = {...obj.velocity};
       const accel = obj.acceleration;
       if (isEqualF(accel.x, 0))
         accel.x = 0;
@@ -168,7 +184,7 @@ export default class Physics {
         after.x = 0;
       if (isEqualF(after.y, 0))
         after.y = 0;
-      obj.veolocity = after;
+      obj.velocity = after;
     }
     return this;
   }
@@ -178,7 +194,7 @@ export default class Physics {
     for (let id of this.#movableObjects) {
       const obj = this.#allObjects[id];
       const start = {...obj.position};
-      const vel = obj.veolocity;
+      const vel = obj.velocity;
       const after = {
         x: start.x + vel.x * elapsedTime,
         y: start.y + vel.y * elapsedTime
@@ -193,7 +209,8 @@ export default class Physics {
   }
 
   #handleCollisions() {
-    const handlers = Object.values(this.#collideCallbacks);
+    const callbackIds = Object.keys(this.#collideCallbacks)
+      .sort();
     this.#getAllCollisions()
       .forEach(({collider, collidee}) => {
         if (!collidee.isDynamic || !collider.isDynamic) {
@@ -202,11 +219,12 @@ export default class Physics {
         else {
           this.#resolveCollideWithDynamic(collider, collidee);
         }
-        handlers.forEach(({trigger, callback}) => {
-          if (trigger(collider, collidee)) {
-            callback(collider, collidee);
-            }
-          })
+        for (let id of callbackIds) {
+          const {trigger, callback} = this.#collideCallbacks[Number(id)];
+          if (trigger(collider, collidee, this.#elapsedTime)) {
+            callback(collider, collidee, this.#elapsedTime);
+          }
+        }
       })
     return this;
   }
@@ -240,14 +258,14 @@ export default class Physics {
         return ;
       }
 
-      const collisionEpsilon = (Math.abs(collider.veolocity.x) + Math.abs(collider.veolocity.y)) * 0.05;
+      const collisionEpsilon = (Math.abs(collider.velocity.x) + Math.abs(collider.velocity.y)) * 0.05;
       if (collideAxes.x) {
-        if (collider.veolocity.x > 0 && 
+        if (collider.velocity.x > 0 && 
           collider.midX < collidee.midX &&
           Math.abs(collider.right - collidee.left) < collisionEpsilon) {
           collider.position.x = collidee.left - collider.width; 
         }
-        else if (collider.veolocity.x < 0 && 
+        else if (collider.velocity.x < 0 && 
           collider.midX > collidee.midX &&
           Math.abs(collider.left - collidee.right) < collisionEpsilon) {
           collider.position.x = collidee.right;
@@ -257,12 +275,12 @@ export default class Physics {
         }
       }
       if (collideAxes.y) {
-        if (collider.veolocity.y > 0 && 
+        if (collider.velocity.y > 0 && 
           collider.midY < collidee.midY &&
           Math.abs(collider.top - collidee.bottom) < collisionEpsilon) {
           collider.position.y = collidee.bottom - collider.height;
         }
-        else if (collider.veolocity.y < 0 &&
+        else if (collider.velocity.y < 0 &&
           collider.midY > collidee.midY &&
           Math.abs(collider.bottom - collidee.top) < collisionEpsilon) {
           collider.position.y = collidee.top;
@@ -275,14 +293,26 @@ export default class Physics {
       if (collider.isDynamic)  {
         // TODO: acceleration?
         if (collideAxes.x) { 
-          collider.veolocity.x *= -1;
+          collider.velocity.x *= -1;
         }
         if (collideAxes.y)
-          collider.veolocity.y *= -1;
+          collider.velocity.y *= -1;
+
+        if (collideAxes.x && collideAxes.y && collider.isShape("CIRCLE")) {
+          let randomness = Math.abs((Math.random() - 0.5) * 0.3);
+          if (collider.velocity.x > 0) {
+            collider.velocity.x *= 1.0 + randomness;
+            collider.velocity.y *= 1.0 - randomness;
+          }
+          else {
+            collider.velocity.x *= 1.0 + randomness;
+            collider.velocity.y *= 1.0 - randomness;
+          }
+        }
       }
       else {
         collider.acceleration = { x: 0, y: 0 };
-        collider.veolocity = { x: 0, y:0 };
+        collider.velocity = { x: 0, y:0 };
       }
     }
 

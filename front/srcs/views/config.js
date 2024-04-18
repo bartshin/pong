@@ -1,7 +1,9 @@
+import MapSelector from "@/views/components/map_selector";
 import GameView from "@/views/game/game_view";
-import LoginView from "@/views/login/login_view";
-import HomeView from "@/views/home/home_view";
-import NavBar from "@/views/components/nav_bar";
+import TournamentPanel from "@/views/components/tournament_panel";
+import UserLabel from "@/views/components/user_label";
+import ColorPicker from "@/views/components/color_picker.js";
+import ResultModal from "@/views/components/result_modal";
 
 /**
  * fileName for view class MUST contain '_' or '-' (Web components requirement)
@@ -12,34 +14,45 @@ export default {
   "filePath": {
     "components": [
       {
-        "className": "NavBar",
-        "fileName": "nav_bar.html"
-      }
-    ],
-    "home": [ 
+        "className": "MapSelector",
+        "fileName": "map_selector.html"
+      },
       {
-        "className": "HomeView",
-        "fileName": "home_view.html"
-      }
-    ],
-    "login": [ 
+        "className": "UserLabel",
+        "fileName": "user_label.html"
+      },
       {
-        "className": "LoginView",
-        "fileName": "login_view.html"
-      }
-    ] ,
+        "className": "TournamentPanel",
+        "fileName": "tournament_panel.html"
+      },
+      {
+        "className": "ColorPicker",
+        "fileName": "color_picker.html"
+      },
+      {
+        "className": "ResultModal",
+        "fileName": "result_modal.html"
+      },
+    ],
     "game": [ 
       {
         "className": "GameView",
         "fileName": "game_view.html"
       }
-    ]
+    ],
   }
 }
 
 export const viewConstructors = {
   GameView,
-  HomeView,
-  NavBar,
-  LoginView
+  MapSelector,
+  UserLabel,
+  TournamentPanel,
+  ColorPicker,
+  ResultModal
 };
+
+export const routes = [
+  { path: "/game", view: GameView },
+];
+

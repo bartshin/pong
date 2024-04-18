@@ -1,4 +1,5 @@
 //@ts-nocheck
+import { DEBUG } from "@/data/global";
 import binding from "@/lib/binding";
 import Observable from "@/lib/observable";
 import ObservableObject from "@/lib/observable_object";
@@ -44,7 +45,8 @@ export default class BindedView extends View {
     const eventKey = element.getAttribute(DATA_EVENT_KEY);
     const found = this.#bindingParams[key];
     if (!found || !(found.set)) {
-      console.error("fail to bind event ", key);
+      if (DEBUG.isDebug())
+        console.error("fail to bind event ", key);
       return ;
     }
     element.addEventListener(eventKey, () => {
@@ -72,7 +74,7 @@ export default class BindedView extends View {
     const key = element.getAttribute(DATA_BINDING_KEY);
     const path = element.getAttribute(DATA_BINDING_PATH); 
     const found = this.#bindingParams[key];
-    if (!found) {
+    if (!found && DEBUG.isDebug()) {
       console.error("fail to bind ", key);
       return;
     }

@@ -1,4 +1,7 @@
 //@ts-nocheck
+
+import { DEBUG } from "@/data/global";
+
 /**
  * ObservableObject wrapper
  */
@@ -10,6 +13,13 @@ export default class ObservableObject {
     const proxy = new Proxy(inner, {
       /** @param {_ObservableObject} obj */
       get: (obj, prop) => {
+        if (prop == "_proxy") {
+          if (!obj._proxy) {
+            if (DEBUG.isDebug())
+              console.error("proxy is not set");
+            return this;
+          }
+        }
         if (typeof obj[prop] === 'function')
           return obj[prop].bind(inner);
         if (typeof prop === "string")
@@ -32,6 +42,7 @@ export default class ObservableObject {
         return ObservableObject;
       }
     })
+    inner.setValue("_proxy", proxy);
     return proxy;
   }
 
@@ -64,6 +75,8 @@ class _ObservableObject {
    */
   #listeners;
 
+  _proxy = null;;
+
   /** @type {Number} */
   $listenerId = 0;
 
@@ -79,13 +92,15 @@ class _ObservableObject {
   getValue(key) {
     if (this.#object[key] && 
       typeof this.#object[key] === "function") {
-
       return this.#object[key].bind(this.#object)
     }
     if (this.#object.hasOwnProperty(key)) {
       return this.#object[key]; 
     }
-    return undefined;
+    if( Object.getPrototypeOf(this.#object).hasOwnProperty(key)) {
+      return this.#object[key];
+    }
+    return null;
   }
 
   /**
@@ -96,7 +111,7 @@ class _ObservableObject {
     if (this.#object.hasOwnProperty(key) && 
     this.#object[key] != value) {
       this.#object[key] = value;
-      this.#valueChanged(key);
+      this.valueChanged(key);
     }
     else {
       this.#object[key] = value;
@@ -104,7 +119,7 @@ class _ObservableObject {
   }
   
   /** @param {string} key */
-  #valueChanged(key) {
+  valueChanged(key) {
     if(this.#listeners.hasOwnProperty(key)) {
       this.#listeners[key].forEach(e => 
         e.callback(this.#object[key])
@@ -112,7 +127,7 @@ class _ObservableObject {
     }
   }
 
-  #sumNumberOfListners() {
+  #sumNumberOfLisetners() {
     let sum = 0;
     for (const key in this.#listeners) {
       sum += this.#listeners[key].length;
@@ -125,8 +140,9 @@ class _ObservableObject {
    * @param {(value: any) => void} listener
    */
   subscribe(key, listener) {
-    if (this.#sumNumberOfListners() >= _ObservableObject.MAX_LISTENER) {
-      console.error("max listener is exceeded");
+    if (this.#sumNumberOfLisetners() >= _ObservableObject.MAX_LISTENER) {
+      if (DEBUG.isDebug())
+        console.error("max listener is exceeded");
       return -1;
     }
     if (!this.#listeners.hasOwnProperty(key)) {
@@ -154,5 +170,4 @@ class _ObservableObject {
       this.#listeners[key].splice(found, 1);
     }
   }
-
 }

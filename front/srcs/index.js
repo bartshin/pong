@@ -1,12 +1,11 @@
 import init from "@/init";
-import { anchorToLink, route } from "@/router";
-
-anchorToLink(document);
+import { anchorToLink, route, NAVIGATE_DRIRECTION } from "@/router";
 
 document.addEventListener("DOMContentLoaded", async () => {
   init();
-  route();
+  anchorToLink(document);
+  route({
+    path:"/game",
+    direction: NAVIGATE_DRIRECTION.forward
+  });
 })
-
-window.addEventListener("popstate", route);
-
