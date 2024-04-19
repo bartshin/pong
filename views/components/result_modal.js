@@ -20,7 +20,8 @@ export default class ResultModal extends View {
     this.#container = this.querySelector("#modal-container");
     this.#window = this.querySelector("#modal-content");
     this.#homeButton = this.querySelector("#home-button");
-    this.#homeButton.addEventListener("click", () =>
+    if (this.#homeButton)
+      this.#homeButton.addEventListener("click", () =>
     this.#confirmHandler());
     this.#detailText = this.querySelector("#detail-text");
     this.#detailText.innerText = this.#data.text;

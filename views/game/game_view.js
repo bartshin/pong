@@ -455,7 +455,7 @@ export default class GameView extends View {
     const modal = new ResultModal({
       data: {
         delay,
-        text: winner + "의 승리!"
+        text: winner + " Win!"
       },
       confirmHandler: () => {
         route({
